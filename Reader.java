@@ -17,10 +17,15 @@ public class Reader extends Thread {
         this.nick = nick;
         this.auth = auth;
     }
-    
+
     public void run() {
-        connect();
-        read();
+        try {
+            connect();
+            read();
+        }
+        catch (Exception e) {
+
+        }
     }
 
     public void connect() throws Exception {
