@@ -56,8 +56,10 @@ public class Reader extends Thread {
         while ((line = br.readLine()) != null) {
             if (line.contains("PRIVMSG " + channel)){
                 String sender = line.substring(1, line.indexOf('!'));
-                String message = line.substring(line.indexOf(':', line.indexOf("PRIVMSG " + channel)) + 1);
-                bot.handleIncomingMessage(sender, message);
+                String content = line.substring(line.indexOf(':', line.indexOf("PRIVMSG " + channel)) + 1);
+                Message message = new Message(new User(sender), content);
+                // bot.handleIncomingMessage(sender, content);
+                bot.handleIncomingMessage(message);
             }
             
             if (line.contains("PING")){

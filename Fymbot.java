@@ -1,5 +1,6 @@
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
 
 public class Fymbot {
     private String server;
@@ -9,6 +10,7 @@ public class Fymbot {
     private Reader reader;
     private BufferedReader br;
     private BufferedWriter bw;
+    private ArrayList<User> users;
     
     public Fymbot() {
         
@@ -18,9 +20,10 @@ public class Fymbot {
         this.channel = channel;
         this.nick = nick;
         this.auth = auth;
+        this.users = new ArrayList<User>();
     }
     
-    private void connect() throws Exception {
+    public void connect() throws Exception {
         reader = new Reader(this, server, channel, nick, auth);
         reader.start();
     }
@@ -32,19 +35,24 @@ public class Fymbot {
     public void handleIncomingMessage(String author, String message) {
         System.out.println(author + ": " + message);
     }
-    
-    public static void main(String[] args) {
-        String server = "";
-        String channel = "";
-        String nick = "";
-        String auth = "";
-        Fymbot bot = new Fymbot(server, channel, nick, auth);
-        try {
-            bot.connect();
-            bot.sendMessage("haHAA");
+    public void handleIncomingMessage(Message message) {
+        System.out.println(message.toString());
+        addUserToUserlist(message.getUser());
+    }
+    public void addUserToUserlist(User user) {
+        boolean found = false;
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUsername().equals(user.getUsername())) {
+                found = true;
+                break;
+            }
         }
-        catch(Exception e) {
-
+        if (!found) {
+            users.add(user);
+            System.out.println("Added: " + user.getUsername());
+        }
+        else {
+            System.out.println("User already in list.");
         }
     }
 }
