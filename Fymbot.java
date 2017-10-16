@@ -7,10 +7,11 @@ public class Fymbot {
     private String channel;
     private String nick;
     private String auth;
-    private Reader reader;
+    private MessageHandler messageHandler;
     private BufferedReader br;
     private BufferedWriter bw;
     private ArrayList<User> users;
+    private ArrayList<Command> commands;
     
     public Fymbot() {
         
@@ -20,24 +21,30 @@ public class Fymbot {
         this.channel = channel;
         this.nick = nick;
         this.auth = auth;
-        this.users = new ArrayList<User>();
+        users = new ArrayList<User>();
+        commands = new ArrayList<Command>();
+        try {
+            Socket socket = new Socket(server, 6667);
+            bw = new BufferedWriter(
+                new OutputStreamWriter(socket.getOutputStream()));
+        }
+        catch (Exception e) {
+
+        }
     }
     
     public void connect() throws Exception {
-        reader = new Reader(this, server, channel, nick, auth);
-        reader.start();
+        messageHandler = new MessageHandler(this, server, channel, nick, auth);
+        messageHandler.start();
     }
-    public void sendMessage(String message) throws Exception {
-        System.out.println("Trying to send: " + message);
-        bw.write("PRIVMSG " + this.channel + " :" + message + "\r\n");
-        bw.flush();
-    }
-    public void handleIncomingMessage(String author, String message) {
-        System.out.println(author + ": " + message);
-    }
-    public void handleIncomingMessage(Message message) {
-        System.out.println(message.toString());
-        addUserToUserlist(message.getUser());
+    public void checkIfMessageIsCommand(Message message) throws Exception {
+        boolean found = false;
+        for (Command c : commands) {
+            if (c.getCmd().equals(message.getContent())) {
+                c.respond();
+                break;
+            }
+        }
     }
     public void addUserToUserlist(User user) {
         boolean found = false;
@@ -54,5 +61,11 @@ public class Fymbot {
         else {
             System.out.println("User already in list.");
         }
+    }
+    public void addCommand(String cmd, String response) {
+        commands.add(new Command(this, cmd, response));
+    }
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
     }
 }

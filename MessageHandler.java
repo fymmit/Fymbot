@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.*;
 
-public class Reader extends Thread {
+public class MessageHandler extends Thread {
     Fymbot bot;
     String server;
     String channel;
@@ -10,7 +10,7 @@ public class Reader extends Thread {
     BufferedReader br;
     BufferedWriter bw;
 
-    public Reader(Fymbot bot, String server, String channel, String nick, String auth) {
+    public MessageHandler(Fymbot bot, String server, String channel, String nick, String auth) {
         this.bot = bot;
         this.server = server;
         this.channel = channel;
@@ -24,7 +24,7 @@ public class Reader extends Thread {
             read();
         }
         catch (Exception e) {
-            System.out.println("error");
+            e.printStackTrace();
         }
     }
 
@@ -37,7 +37,18 @@ public class Reader extends Thread {
         bw.write("PASS " + this.auth + "\r\n");
         bw.write("NICK " + this.nick + "\r\n");
         bw.write("JOIN " + this.channel + "\r\n");
+        bw.write("PRIVMSG " + this.channel + " :Ready for takeoff.\r\n");
         bw.flush();
+    }
+    public void sendMessage(String message) throws Exception {
+        System.out.println("Trying to send: " + message);
+        bw.write("PRIVMSG " + this.channel + " :" + message + "\r\n");
+        bw.flush();
+    }
+    private void handleIncomingMessage(Message message) throws Exception {
+        System.out.println(message.toString());
+        bot.addUserToUserlist(message.getUser());
+        bot.checkIfMessageIsCommand(message);
     }
     public void read() throws Exception {
         System.out.println("twitch read");
@@ -58,8 +69,9 @@ public class Reader extends Thread {
                 String sender = line.substring(1, line.indexOf('!'));
                 String content = line.substring(line.indexOf(':', line.indexOf("PRIVMSG " + channel)) + 1);
                 Message message = new Message(new User(sender), content);
+
                 // bot.handleIncomingMessage(sender, content);
-                bot.handleIncomingMessage(message);
+                handleIncomingMessage(message);
             }
             
             if (line.contains("PING")){
