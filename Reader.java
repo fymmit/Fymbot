@@ -24,7 +24,7 @@ public class Reader extends Thread {
             read();
         }
         catch (Exception e) {
-
+            System.out.println("error");
         }
     }
 
