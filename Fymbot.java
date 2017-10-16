@@ -34,8 +34,11 @@ public class Fymbot {
     }
     
     public static void main(String[] args) {
+        String server = "";
+        String channel = "";
+        String nick = "";
         String auth = "";
-        Fymbot bot = new Fymbot("irc.chat.twitch.tv", "#lulzik", "fymbot", auth);
+        Fymbot bot = new Fymbot(server, channel, nick, auth);
         try {
             bot.connect();
             bot.sendMessage("haHAA");
